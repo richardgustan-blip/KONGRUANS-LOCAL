@@ -739,9 +739,15 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
+
+        // Configuration Supabase
+        const SUPABASE_URL = 'https://ufemtbfukndbtjhwuhta.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmZW10YmZ1a25kYnRqaHd1aHRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNjQ3NjksImV4cCI6MjEwNTg0MDc2OX0.hnaTPcETrA9Jws2lWZ6_K-ykQhkb_Mf4z7rmcUhnUvc';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Fonction de hachage SHA-256
         async function hashPassword(password) {
@@ -825,106 +831,150 @@
             }
         ];
 
-        // Compte démo toujours disponible (indépendant du navigateur de test)
-        // Hash SHA-256 de "Test1234!"
-        const DEMO_PASSWORD_HASH = 'a78a8c51996f0a4f2cdd3e4df5887a3f5a3e8e3e4b2e1d0c9b8a7f6e5d4c3b2a';
+        // Compte démo
         const DEMO_USER = {
-            id: 'demo-testeur',
-            name: 'Testeur',
             email: 'testeur@kongruans.app',
-            password: 'Test1234!',  // Mot de passe affiché à l'utilisateur
-            passwordHash: null  // Sera calculé dynamiquement
+            password: 'Test1234!',
+            name: 'Testeur'
         };
 
         const normalizeEmail = (email) => (email || '').trim().toLowerCase();
 
-        // Nettoyage des anciennes données (migration v1 → v2) - s'exécute UNE SEULE FOIS
-        (function cleanupLegacyData() {
-            try {
-                // Vérifier si la migration a déjà été faite
-                if (localStorage.getItem('kongruans_migrated_v2')) return;
+        // Initialisation du compte démo dans Supabase (une seule fois)
+        async function initDemoUser() {
+            const demoEmail = normalizeEmail(DEMO_USER.email);
+            const { data } = await supabase
+                .from('users')
+                .select('id')
+                .eq('email', demoEmail)
+                .single();
 
-                // Supprimer les anciennes données globales
-                localStorage.removeItem('kongruans_scans');
-                localStorage.removeItem('kongruans_journal');
-                // Supprimer les anciens comptes (mot de passe non hashé)
-                const users = JSON.parse(localStorage.getItem('kongruans_users') || '[]');
-                const hasLegacyUsers = users.some(u => u.password && !u.passwordHash);
-                if (hasLegacyUsers) {
-                    localStorage.removeItem('kongruans_users');
-                    localStorage.removeItem('kongruans_user');
-                    console.log('KONGRUANS: Anciennes données nettoyées. Veuillez recréer votre compte.');
-                }
+            if (!data) {
+                const passwordHash = await hashPassword(DEMO_USER.password);
+                await supabase.from('users').insert({
+                    email: demoEmail,
+                    name: DEMO_USER.name,
+                    password_hash: passwordHash
+                });
+            }
+        }
+        initDemoUser();
 
-                // Marquer la migration comme effectuée
-                localStorage.setItem('kongruans_migrated_v2', 'true');
-            } catch (e) { /* ignore */ }
-        })();
-
-        // Stockage local
+        // Stockage avec Supabase
         const storage = {
-            read: (key, fallback) => {
+            // Session locale (pour garder l'utilisateur connecté)
+            getUser: () => {
                 try {
-                    const raw = localStorage.getItem(key);
-                    if (raw == null) return fallback;
-                    return JSON.parse(raw);
-                } catch (err) {
-                    return fallback;
-                }
+                    const raw = localStorage.getItem('kongruans_user');
+                    return raw ? JSON.parse(raw) : null;
+                } catch (e) { return null; }
             },
-            write: (key, value) => {
+            setUser: (user) => {
                 try {
-                    localStorage.setItem(key, JSON.stringify(value));
+                    localStorage.setItem('kongruans_user', JSON.stringify(user));
                     return true;
-                } catch (err) {
-                    return false;
-                }
+                } catch (e) { return false; }
             },
-            getUsers: async () => {
-                const users = storage.read('kongruans_users', []);
-                const hasDemo = users.some(u => normalizeEmail(u.email) === normalizeEmail(DEMO_USER.email));
-                if (!hasDemo) {
-                    const demoHash = await hashPassword(DEMO_USER.password);
-                    users.push({
-                        id: DEMO_USER.id,
-                        name: DEMO_USER.name,
-                        email: DEMO_USER.email,
-                        passwordHash: demoHash,
-                        createdAt: new Date().toISOString()
-                    });
-                    storage.write('kongruans_users', users);
-                }
-                return users;
-            },
-            saveUsers: (users) => storage.write('kongruans_users', users),
-            getUser: () => storage.read('kongruans_user', null),
-            setUser: (user) => storage.write('kongruans_user', user),
             removeUser: () => {
-                try { localStorage.removeItem('kongruans_user'); } catch (err) { /* ignore */ }
+                try { localStorage.removeItem('kongruans_user'); } catch (e) {}
             },
-            getScans: () => {
+
+            // Authentification via Supabase
+            async login(email, password) {
+                const passwordHash = await hashPassword(password);
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('id, email, name')
+                    .eq('email', normalizeEmail(email))
+                    .eq('password_hash', passwordHash)
+                    .single();
+
+                if (error || !data) return null;
+                return data;
+            },
+
+            async register(email, password, name) {
+                const normalizedEmail = normalizeEmail(email);
+
+                // Vérifier si l'email existe déjà
+                const { data: existing } = await supabase
+                    .from('users')
+                    .select('id')
+                    .eq('email', normalizedEmail)
+                    .single();
+
+                if (existing) return { error: 'Cet email est déjà utilisé' };
+
+                const passwordHash = await hashPassword(password);
+                const { data, error } = await supabase
+                    .from('users')
+                    .insert({ email: normalizedEmail, name, password_hash: passwordHash })
+                    .select('id, email, name')
+                    .single();
+
+                if (error) return { error: "Erreur lors de l'inscription" };
+                return { user: data };
+            },
+
+            // Scans via Supabase
+            async getScans() {
                 const user = storage.getUser();
                 if (!user) return [];
-                return storage.read(`kongruans_scans_${user.id}`, []);
+
+                const { data, error } = await supabase
+                    .from('scans')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .order('created_at', { ascending: true });
+
+                if (error) return [];
+                return data.map(s => ({
+                    date: s.created_at,
+                    scores: { pensee: s.pensee, parole: s.parole, action: s.action },
+                    answers: s.answers
+                }));
             },
-            addScan: (scan) => {
+
+            async addScan(scan) {
                 const user = storage.getUser();
                 if (!user) return;
-                const scans = storage.getScans();
-                scans.push(scan);
-                storage.write(`kongruans_scans_${user.id}`, scans);
+
+                await supabase.from('scans').insert({
+                    user_id: user.id,
+                    pensee: scan.scores.pensee,
+                    parole: scan.scores.parole,
+                    action: scan.scores.action,
+                    answers: scan.answers
+                });
             },
-            getJournal: () => {
+
+            // Journal via Supabase
+            async getJournal() {
                 const user = storage.getUser();
                 if (!user) return [];
-                return storage.read(`kongruans_journal_${user.id}`, []);
+
+                const { data, error } = await supabase
+                    .from('journal')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) return [];
+                return data.map(j => ({
+                    id: j.id,
+                    date: j.created_at,
+                    content: j.content
+                }));
             },
-            addJournalEntry: (entry) => {
+
+            async addJournalEntry(entry) {
                 const user = storage.getUser();
                 if (!user) return;
-                const journal = storage.getJournal();
-                journal.unshift(entry);
-                storage.write(`kongruans_journal_${user.id}`, journal);
+
+                await supabase.from('journal').insert({
+                    user_id: user.id,
+                    content: entry.content
+                });
             }
         };
 
@@ -1032,13 +1082,12 @@
             };
 
             const handleDemoLogin = async () => {
-                await storage.getUsers();
-                const demoUserSession = {
-                    id: DEMO_USER.id,
-                    name: DEMO_USER.name,
-                    email: DEMO_USER.email
-                };
-                loginUser(demoUserSession);
+                const user = await storage.login(DEMO_USER.email, DEMO_USER.password);
+                if (user) {
+                    loginUser(user);
+                } else {
+                    setError('Erreur de connexion au compte démo. Réessayez.');
+                }
             };
 
             const handleSubmit = async (e) => {
@@ -1061,45 +1110,22 @@
                     return;
                 }
 
-                const passwordHash = await hashPassword(password);
-
                 if (isLogin) {
-                    const users = await storage.getUsers();
-                    const user = users.find(u =>
-                        normalizeEmail(u.email) === email && u.passwordHash === passwordHash
-                    );
-
+                    // Connexion via Supabase
+                    const user = await storage.login(email, password);
                     if (user) {
-                        // Ne pas stocker le hash dans la session
-                        const userSession = { id: user.id, name: user.name, email: user.email };
-                        loginUser(userSession);
+                        loginUser(user);
                     } else {
                         setError('Email ou mot de passe incorrect. Créez un compte ici, ou utilisez le compte démo ci-dessous.');
                     }
                 } else {
-                    const users = await storage.getUsers();
-
-                    if (users.find(u => normalizeEmail(u.email) === email)) {
-                        setError('Cet email est déjà utilisé');
-                        return;
+                    // Inscription via Supabase
+                    const result = await storage.register(email, password, name);
+                    if (result.error) {
+                        setError(result.error);
+                    } else {
+                        loginUser(result.user);
                     }
-
-                    const newUser = {
-                        id: Date.now(),
-                        name,
-                        email,
-                        passwordHash,
-                        createdAt: new Date().toISOString()
-                    };
-
-                    users.push(newUser);
-                    if (!storage.saveUsers(users)) {
-                        setError("Impossible d'enregistrer le compte (stockage du navigateur bloqué). Essayez http:// plutôt que d'ouvrir le fichier HTML directement.");
-                        return;
-                    }
-                    // Ne pas stocker le hash dans la session
-                    const userSession = { id: newUser.id, name: newUser.name, email: newUser.email };
-                    loginUser(userSession);
                 }
             };
             
@@ -1191,15 +1217,24 @@
 
         // Dashboard Component
         function Dashboard({ user }) {
-            const scans = storage.getScans();
+            const [scans, setScans] = useState([]);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                storage.getScans().then(data => {
+                    setScans(data);
+                    setLoading(false);
+                });
+            }, []);
+
             const lastScan = scans[scans.length - 1];
-            
-            const hasScannedToday = lastScan && 
+            const hasScannedToday = lastScan &&
                 new Date(lastScan.date).toDateString() === new Date().toDateString();
-            
-            const avgScore = lastScan ? 
+            const avgScore = lastScan ?
                 Math.round((lastScan.scores.pensee + lastScan.scores.parole + lastScan.scores.action) / 3) : 0;
-            
+
+            if (loading) return <div className="dashboard"><p>Chargement...</p></div>;
+
             return (
                 <div className="dashboard">
                     <div className="welcome">
@@ -1304,7 +1339,7 @@
                 }
             };
             
-            const calculateResults = () => {
+            const calculateResults = async () => {
                 const penseeQuestions = QUESTIONS.filter(q => q.pillar === 'pensee');
                 const paroleQuestions = QUESTIONS.filter(q => q.pillar === 'parole');
                 const actionQuestions = QUESTIONS.filter(q => q.pillar === 'action');
@@ -1328,8 +1363,8 @@
                     },
                     answers: answers
                 };
-                
-                storage.addScan(scanResults);
+
+                await storage.addScan(scanResults);
                 setResults(scanResults);
                 setShowResults(true);
             };
@@ -1520,22 +1555,32 @@
 
         // Journal Component
         function Journal() {
-            const [entries, setEntries] = useState(storage.getJournal());
+            const [entries, setEntries] = useState([]);
             const [newEntry, setNewEntry] = useState('');
-            
-            const handleSave = () => {
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                storage.getJournal().then(data => {
+                    setEntries(data);
+                    setLoading(false);
+                });
+            }, []);
+
+            const handleSave = async () => {
                 if (!newEntry.trim()) return;
-                
+
                 const entry = {
                     id: Date.now(),
                     date: new Date().toISOString(),
                     content: newEntry
                 };
-                
-                storage.addJournalEntry(entry);
+
+                await storage.addJournalEntry(entry);
                 setEntries([entry, ...entries]);
                 setNewEntry('');
             };
+
+            if (loading) return <div className="container"><p>Chargement...</p></div>;
             
             return (
                 <div className="container">
@@ -1590,10 +1635,20 @@
 
         // Results Component (affiche le dernier scan du jour)
         function Results() {
-            const scans = storage.getScans();
-            const todayScan = scans.filter(scan =>
-                new Date(scan.date).toDateString() === new Date().toDateString()
-            ).pop();
+            const [todayScan, setTodayScan] = useState(null);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                storage.getScans().then(scans => {
+                    const scan = scans.filter(s =>
+                        new Date(s.date).toDateString() === new Date().toDateString()
+                    ).pop();
+                    setTodayScan(scan);
+                    setLoading(false);
+                });
+            }, []);
+
+            if (loading) return <div className="results-container"><p>Chargement...</p></div>;
 
             if (!todayScan) {
                 return (
@@ -1662,20 +1717,33 @@
 
         // Progress Component
         function Progress() {
-            const scans = storage.getScans();
+            const [scans, setScans] = useState([]);
+            const [journalCount, setJournalCount] = useState(0);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                Promise.all([storage.getScans(), storage.getJournal()]).then(([scansData, journalData]) => {
+                    setScans(scansData);
+                    setJournalCount(journalData.length);
+                    setLoading(false);
+                });
+            }, []);
+
             const totalScans = scans.length;
-            const avgScore = scans.length > 0 
-                ? Math.round(scans.reduce((sum, scan) => 
+            const avgScore = scans.length > 0
+                ? Math.round(scans.reduce((sum, scan) =>
                     sum + (scan.scores.pensee + scan.scores.parole + scan.scores.action) / 3, 0) / scans.length)
                 : 0;
-            
+
+            if (loading) return <div className="container"><p>Chargement...</p></div>;
+
             return (
                 <div className="container">
                     <div style={{textAlign: 'center', marginBottom: '40px'}}>
                         <h2 style={{fontSize: '32px', marginBottom: '12px'}}>Votre Progression</h2>
                         <p style={{color: 'var(--text-secondary)'}}>Suivez votre évolution au fil du temps</p>
                     </div>
-                    
+
                     <div className="stats-grid" style={{marginBottom: '40px'}}>
                         <div className="stat-card">
                             <div className="stat-value">{totalScans}</div>
@@ -1686,7 +1754,7 @@
                             <div className="stat-label">Score moyen</div>
                         </div>
                         <div className="stat-card">
-                            <div className="stat-value">{storage.getJournal().length}</div>
+                            <div className="stat-value">{journalCount}</div>
                             <div className="stat-label">Entrées de journal</div>
                         </div>
                     </div>
