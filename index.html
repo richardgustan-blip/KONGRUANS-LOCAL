@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KONGRUANS - Votre Alignement Personnel</title>
+    <meta name="description" content="KONGRUANS - Mesurez et améliorez votre congruence entre Pensée, Parole et Action">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Couleurs des piliers */
+            --pensee: #4A90E2;
+            --parole: #50C878;
+            --action: #E74C3C;
+            
+            /* Palette principale */
+            --bg-primary: #0a0a15;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --border: #2a2a3e;
+            
+            /* Accents */
+            --accent-gold: #ffd700;
+            --success: #50C878;
+            --warning: #ff9500;
+            --error: #E74C3C;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Background effet */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(74, 144, 226, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(80, 200, 120, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(231, 76, 60, 0.05) 0%, transparent 50%);
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Auth Screen */
+        .auth-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .auth-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 48px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: fadeInUp 0.6s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo h1 {
+            font-size: 42px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--pensee), var(--parole), var(--action));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+        }
+        
+        .logo p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-family: 'Space Mono', monospace;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--pensee);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--pensee), var(--parole));
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            margin-top: 12px;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        
+        /* Navigation */
+        nav {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--pensee), var(--parole), var(--action));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .nav-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        
+        .nav-btn:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        
+        .nav-btn.active {
+            background: var(--pensee);
+            color: white;
+        }
+        
+        /* Dashboard */
+        .dashboard {
+            padding: 40px 0;
+        }
+        
+        .welcome {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .welcome h2 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .welcome p {
+            color: var(--text-secondary);
+        }
+        
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        
+        .card p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+        
+        /* Triangle Congruence */
+        .triangle-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .triangle-title {
+            font-size: 24px;
+            margin-bottom: 32px;
+        }
+        
+        #triangleCanvas {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .congruence-score {
+            margin-top: 32px;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .score-item {
+            text-align: center;
+        }
+        
+        .score-value {
+            font-size: 48px;
+            font-weight: 700;
+            font-family: 'Space Mono', monospace;
+        }
+        
+        .score-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        
+        /* Scan Questions */
+        .scan-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .scan-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .scan-header h2 {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--pensee), var(--parole), var(--action));
+            border-radius: 8px;
+            transition: width 0.3s ease;
+        }
+        
+        .question-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.4s ease;
+        }
+        
+        .pillar-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .pillar-pensee {
+            background: rgba(74, 144, 226, 0.2);
+            color: var(--pensee);
+        }
+        
+        .pillar-parole {
+            background: rgba(80, 200, 120, 0.2);
+            color: var(--parole);
+        }
+        
+        .pillar-action {
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--action);
+        }
+        
+        .question-text {
+            font-size: 20px;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+        
+        .rating-buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+        }
+        
+        .rating-btn {
+            padding: 16px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        
+        .rating-btn:hover {
+            background: var(--bg-primary);
+            transform: scale(1.05);
+        }
+        
+        .rating-btn.selected {
+            background: var(--pensee);
+            border-color: var(--pensee);
+            color: white;
+        }
+        
+        .scan-navigation {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        .scan-navigation button {
+            flex: 1;
+        }
+        
+        /* Results */
+        .results-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .results-hero {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 60px 40px;
+            margin-bottom: 40px;
+        }
+        
+        .results-hero h2 {
+            font-size: 36px;
+            margin-bottom: 16px;
+        }
+        
+        .main-score {
+            font-size: 96px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--pensee), var(--parole), var(--action));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: 'Space Mono', monospace;
+            margin: 24px 0;
+        }
+        
+        .pillar-scores {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        
+        .pillar-score-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+        }
+        
+        .pillar-score-card h3 {
+            margin-bottom: 16px;
+        }
+        
+        .pillar-score-value {
+            font-size: 48px;
+            font-weight: 700;
+            font-family: 'Space Mono', monospace;
+        }
+        
+        /* Exercises */
+        .exercises-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        
+        .exercise-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .exercise-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        
+        .exercise-duration {
+            background: var(--bg-secondary);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-family: 'Space Mono', monospace;
+        }
+        
+        /* Journal */
+        .journal-entry {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .entry-date {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-family: 'Space Mono', monospace;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            line-height: 1.6;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--pensee);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+        
+        /* Progress */
+        .progress-chart {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+        
+        .stat-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            font-family: 'Space Mono', monospace;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .auth-card {
+                padding: 32px 24px;
+            }
+            
+            .logo h1 {
+                font-size: 32px;
+            }
+            
+            .nav-content {
+                flex-direction: column;
+                gap: 16px;
+            }
+            
+            .nav-menu {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .welcome h2 {
+                font-size: 24px;
+            }
+            
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .triangle-container {
+                padding: 24px;
+            }
+            
+            .congruence-score {
+                gap: 24px;
+            }
+            
+            .score-value {
+                font-size: 36px;
+            }
+            
+            .question-card {
+                padding: 24px;
+            }
+            
+            .question-text {
+                font-size: 18px;
+            }
+            
+            .rating-buttons {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 8px;
+            }
+            
+            .rating-btn {
+                padding: 12px 8px;
+                font-size: 16px;
+            }
+            
+            .results-hero {
+                padding: 40px 24px;
+            }
+            
+            .main-score {
+                font-size: 72px;
+            }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Alert */
+        .alert {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        
+        .alert-error {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+        
+        .alert-success {
+            background: rgba(80, 200, 120, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .demo-hint {
+            margin-top: 20px;
+            padding: 14px 16px;
+            background: var(--bg-secondary);
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .demo-hint strong {
+            color: var(--text-primary);
+            font-family: 'Space Mono', monospace;
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Fonction de hachage SHA-256
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Questions du scan
+        const QUESTIONS = [
+            // Pensée (4 questions)
+            { id: 1, pillar: 'pensee', text: "Mes pensées sont claires et alignées avec mes valeurs aujourd'hui" },
+            { id: 2, pillar: 'pensee', text: "Je suis conscient(e) de mes intentions avant d'agir" },
+            { id: 3, pillar: 'pensee', text: "J'ai pris le temps de réfléchir à mes objectifs du jour" },
+            { id: 4, pillar: 'pensee', text: "Mes pensées sont positives et constructives" },
+            
+            // Parole (4 questions)
+            { id: 5, pillar: 'parole', text: "Je dis ce que je pense avec authenticité" },
+            { id: 6, pillar: 'parole', text: "Mes mots reflètent mes véritables intentions" },
+            { id: 7, pillar: 'parole', text: "Je communique clairement et avec respect" },
+            { id: 8, pillar: 'parole', text: "Mes paroles sont en accord avec mes valeurs" },
+            
+            // Action (4 questions)
+            { id: 9, pillar: 'action', text: "Mes actions correspondent à ce que j'ai dit" },
+            { id: 10, pillar: 'action', text: "Je mets en pratique ce que je pense" },
+            { id: 11, pillar: 'action', text: "J'agis de manière cohérente avec mes paroles" },
+            { id: 12, pillar: 'action', text: "Mes actes reflètent mes valeurs profondes" }
+        ];
+
+        // Exercices
+        const EXERCISES = [
+            {
+                id: 1,
+                title: "Méditation d'alignement",
+                pillar: "pensee",
+                duration: "10 min",
+                description: "Méditation guidée pour clarifier vos pensées et intentions",
+                instructions: "Trouvez un endroit calme. Asseyez-vous confortablement. Fermez les yeux et concentrez-vous sur votre respiration pendant 2 minutes. Ensuite, visualisez vos trois piliers comme un triangle équilatéral. Imaginez-les s'équilibrer progressivement."
+            },
+            {
+                id: 2,
+                title: "Journal de congruence",
+                pillar: "pensee",
+                duration: "15 min",
+                description: "Écrivez vos pensées, paroles et actions du jour",
+                instructions: "Divisez une page en trois colonnes : Pensée, Parole, Action. Pour chaque situation importante du jour, notez ce que vous avez pensé, dit, et fait. Identifiez les alignements et les écarts."
+            },
+            {
+                id: 3,
+                title: "Pratique de l'authenticité",
+                pillar: "parole",
+                duration: "5 min",
+                description: "Exprimez une vérité que vous avez retenue",
+                instructions: "Choisissez une conversation récente où vous n'avez pas dit complètement ce que vous pensiez. Écrivez ce que vous auriez voulu dire. Pratiquez à voix haute. Engagez-vous à être plus authentique la prochaine fois."
+            },
+            {
+                id: 4,
+                title: "Action cohérente",
+                pillar: "action",
+                duration: "20 min",
+                description: "Réalisez une action en accord avec vos valeurs",
+                instructions: "Identifiez une action que vous avez promise ou envisagée mais pas encore réalisée. Définissez les étapes concrètes. Réalisez la première étape maintenant, même petite."
+            },
+            {
+                id: 5,
+                title: "Scan corporel conscient",
+                pillar: "pensee",
+                duration: "12 min",
+                description: "Connectez-vous à vos sensations physiques",
+                instructions: "Allongez-vous ou asseyez-vous confortablement. Portez attention à chaque partie de votre corps, des pieds à la tête. Notez les tensions ou sensations. Respirez dans ces zones."
+            },
+            {
+                id: 6,
+                title: "Communication non-violente",
+                pillar: "parole",
+                duration: "15 min",
+                description: "Reformulez une conversation difficile",
+                instructions: "Pensez à un conflit récent. Réécrivez votre message en suivant : 1) Observation factuelle, 2) Sentiment ressenti, 3) Besoin sous-jacent, 4) Demande claire."
+            }
+        ];
+
+        // Compte démo toujours disponible (indépendant du navigateur de test)
+        // Hash SHA-256 de "Test1234!"
+        const DEMO_PASSWORD_HASH = 'a78a8c51996f0a4f2cdd3e4df5887a3f5a3e8e3e4b2e1d0c9b8a7f6e5d4c3b2a';
+        const DEMO_USER = {
+            id: 'demo-testeur',
+            name: 'Testeur',
+            email: 'testeur@kongruans.app',
+            password: 'Test1234!',  // Mot de passe affiché à l'utilisateur
+            passwordHash: null  // Sera calculé dynamiquement
+        };
+
+        const normalizeEmail = (email) => (email || '').trim().toLowerCase();
+
+        // Nettoyage des anciennes données (migration v1 → v2)
+        (function cleanupLegacyData() {
+            try {
+                // Supprimer les anciennes données globales
+                localStorage.removeItem('kongruans_scans');
+                localStorage.removeItem('kongruans_journal');
+                // Supprimer les anciens comptes (mot de passe non hashé)
+                const users = JSON.parse(localStorage.getItem('kongruans_users') || '[]');
+                const hasLegacyUsers = users.some(u => u.password && !u.passwordHash);
+                if (hasLegacyUsers) {
+                    localStorage.removeItem('kongruans_users');
+                    localStorage.removeItem('kongruans_user');
+                    console.log('KONGRUANS: Anciennes données nettoyées. Veuillez recréer votre compte.');
+                }
+            } catch (e) { /* ignore */ }
+        })();
+
+        // Stockage local
+        const storage = {
+            read: (key, fallback) => {
+                try {
+                    const raw = localStorage.getItem(key);
+                    if (raw == null) return fallback;
+                    return JSON.parse(raw);
+                } catch (err) {
+                    return fallback;
+                }
+            },
+            write: (key, value) => {
+                try {
+                    localStorage.setItem(key, JSON.stringify(value));
+                    return true;
+                } catch (err) {
+                    return false;
+                }
+            },
+            getUsers: async () => {
+                const users = storage.read('kongruans_users', []);
+                const hasDemo = users.some(u => normalizeEmail(u.email) === normalizeEmail(DEMO_USER.email));
+                if (!hasDemo) {
+                    const demoHash = await hashPassword(DEMO_USER.password);
+                    users.push({
+                        id: DEMO_USER.id,
+                        name: DEMO_USER.name,
+                        email: DEMO_USER.email,
+                        passwordHash: demoHash,
+                        createdAt: new Date().toISOString()
+                    });
+                    storage.write('kongruans_users', users);
+                }
+                return users;
+            },
+            saveUsers: (users) => storage.write('kongruans_users', users),
+            getUser: () => storage.read('kongruans_user', null),
+            setUser: (user) => storage.write('kongruans_user', user),
+            removeUser: () => {
+                try { localStorage.removeItem('kongruans_user'); } catch (err) { /* ignore */ }
+            },
+            getScans: () => {
+                const user = storage.getUser();
+                if (!user) return [];
+                return storage.read(`kongruans_scans_${user.id}`, []);
+            },
+            addScan: (scan) => {
+                const user = storage.getUser();
+                if (!user) return;
+                const scans = storage.getScans();
+                scans.push(scan);
+                storage.write(`kongruans_scans_${user.id}`, scans);
+            },
+            getJournal: () => {
+                const user = storage.getUser();
+                if (!user) return [];
+                return storage.read(`kongruans_journal_${user.id}`, []);
+            },
+            addJournalEntry: (entry) => {
+                const user = storage.getUser();
+                if (!user) return;
+                const journal = storage.getJournal();
+                journal.unshift(entry);
+                storage.write(`kongruans_journal_${user.id}`, journal);
+            }
+        };
+
+        // Triangle Canvas Component
+        function TriangleCanvas({ scores }) {
+            const canvasRef = useRef(null);
+            
+            useEffect(() => {
+                const canvas = canvasRef.current;
+                if (!canvas) return;
+                
+                const ctx = canvas.getContext('2d');
+                const width = canvas.width;
+                const height = canvas.height;
+                const centerX = width / 2;
+                const centerY = height / 2;
+                const radius = 120;
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, width, height);
+                
+                // Calculate triangle points
+                const points = [
+                    { x: centerX, y: centerY - radius, label: 'Pensée', color: '#4A90E2', score: scores.pensee },
+                    { x: centerX - radius * Math.cos(Math.PI / 6), y: centerY + radius * Math.sin(Math.PI / 6), label: 'Parole', color: '#50C878', score: scores.parole },
+                    { x: centerX + radius * Math.cos(Math.PI / 6), y: centerY + radius * Math.sin(Math.PI / 6), label: 'Action', color: '#E74C3C', score: scores.action }
+                ];
+                
+                // Draw filled triangle
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, points[0].y);
+                ctx.lineTo(points[1].x, points[1].y);
+                ctx.lineTo(points[2].x, points[2].y);
+                ctx.closePath();
+                
+                const gradient = ctx.createLinearGradient(0, 0, width, height);
+                gradient.addColorStop(0, 'rgba(74, 144, 226, 0.1)');
+                gradient.addColorStop(0.5, 'rgba(80, 200, 120, 0.1)');
+                gradient.addColorStop(1, 'rgba(231, 76, 60, 0.1)');
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                
+                // Draw triangle edges
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Draw and label points
+                points.forEach((point, i) => {
+                    // Glow effect
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = point.color;
+                    
+                    // Point circle
+                    ctx.beginPath();
+                    ctx.arc(point.x, point.y, 12, 0, Math.PI * 2);
+                    ctx.fillStyle = point.color;
+                    ctx.fill();
+                    
+                    ctx.shadowBlur = 0;
+                    
+                    // Label
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 16px Outfit';
+                    ctx.textAlign = 'center';
+                    const labelY = i === 0 ? point.y - 25 : point.y + 35;
+                    ctx.fillText(point.label, point.x, labelY);
+                    
+                    // Score
+                    ctx.font = '24px Space Mono';
+                    ctx.fillStyle = point.color;
+                    const scoreY = i === 0 ? point.y - 40 : point.y + 55;
+                    ctx.fillText(point.score + '%', point.x, scoreY);
+                });
+                
+                // Draw center point
+                const avgScore = (scores.pensee + scores.parole + scores.action) / 3;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 8, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffd700';
+                ctx.fill();
+                
+                ctx.fillStyle = '#ffd700';
+                ctx.font = 'bold 20px Space Mono';
+                ctx.textAlign = 'center';
+                ctx.fillText(Math.round(avgScore) + '%', centerX, centerY - 20);
+                
+            }, [scores]);
+            
+            return <canvas ref={canvasRef} width="400" height="400" id="triangleCanvas" />;
+        }
+
+        // Auth Component
+        function Auth({ onLogin }) {
+            const [isLogin, setIsLogin] = useState(true);
+            const [formData, setFormData] = useState({ email: '', password: '', name: '' });
+            const [error, setError] = useState('');
+
+            const loginUser = (user) => {
+                if (!storage.setUser(user)) {
+                    setError("Impossible d'enregistrer la session (stockage du navigateur bloqué).");
+                    return;
+                }
+                onLogin(user);
+            };
+
+            const handleDemoLogin = async () => {
+                await storage.getUsers();
+                const demoUserSession = {
+                    id: DEMO_USER.id,
+                    name: DEMO_USER.name,
+                    email: DEMO_USER.email
+                };
+                loginUser(demoUserSession);
+            };
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setError('');
+
+                // Lire le DOM : l'autofill du navigateur ne met pas toujours à jour React
+                const form = new FormData(e.target);
+                const name = (form.get('name') || formData.name || '').trim();
+                const email = normalizeEmail(form.get('email') || formData.email);
+                const password = (form.get('password') || formData.password || '');
+
+                if (!email || !password) {
+                    setError('Veuillez remplir tous les champs');
+                    return;
+                }
+
+                if (!isLogin && !name) {
+                    setError('Veuillez entrer votre nom');
+                    return;
+                }
+
+                const passwordHash = await hashPassword(password);
+
+                if (isLogin) {
+                    const users = await storage.getUsers();
+                    const user = users.find(u =>
+                        normalizeEmail(u.email) === email && u.passwordHash === passwordHash
+                    );
+
+                    if (user) {
+                        // Ne pas stocker le hash dans la session
+                        const userSession = { id: user.id, name: user.name, email: user.email };
+                        loginUser(userSession);
+                    } else {
+                        setError('Email ou mot de passe incorrect. Créez un compte ici, ou utilisez le compte démo ci-dessous.');
+                    }
+                } else {
+                    const users = await storage.getUsers();
+
+                    if (users.find(u => normalizeEmail(u.email) === email)) {
+                        setError('Cet email est déjà utilisé');
+                        return;
+                    }
+
+                    const newUser = {
+                        id: Date.now(),
+                        name,
+                        email,
+                        passwordHash,
+                        createdAt: new Date().toISOString()
+                    };
+
+                    users.push(newUser);
+                    if (!storage.saveUsers(users)) {
+                        setError("Impossible d'enregistrer le compte (stockage du navigateur bloqué). Essayez http:// plutôt que d'ouvrir le fichier HTML directement.");
+                        return;
+                    }
+                    // Ne pas stocker le hash dans la session
+                    const userSession = { id: newUser.id, name: newUser.name, email: newUser.email };
+                    loginUser(userSession);
+                }
+            };
+            
+            return (
+                <div className="auth-screen">
+                    <div className="auth-card">
+                        <div className="logo">
+                            <h1>KONGRUANS</h1>
+                            <p>Pensée • Parole • Action</p>
+                        </div>
+                        
+                        {error && <div className="alert alert-error">{error}</div>}
+                        
+                        <form onSubmit={handleSubmit}>
+                            {!isLogin && (
+                                <div className="form-group">
+                                    <label>Nom</label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        autoComplete="name"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                        placeholder="Votre nom"
+                                    />
+                                </div>
+                            )}
+                            
+                            <div className="form-group">
+                                <label>Email</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    autoComplete="username"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                    placeholder="votre@email.com"
+                                />
+                            </div>
+                            
+                            <div className="form-group">
+                                <label>Mot de passe</label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    autoComplete={isLogin ? 'current-password' : 'new-password'}
+                                    value={formData.password}
+                                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                                    placeholder="••••••••"
+                                />
+                            </div>
+                            
+                            <button type="submit" className="btn btn-primary">
+                                {isLogin ? 'Se connecter' : "S'inscrire"}
+                            </button>
+                            
+                            <button 
+                                type="button" 
+                                className="btn btn-secondary"
+                                onClick={() => {
+                                    setIsLogin(!isLogin);
+                                    setError('');
+                                }}
+                            >
+                                {isLogin ? "Créer un compte" : "J'ai déjà un compte"}
+                            </button>
+                        </form>
+
+                        {isLogin && (
+                            <>
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    style={{marginTop: '12px'}}
+                                    onClick={handleDemoLogin}
+                                >
+                                    Connexion démo (Testeur)
+                                </button>
+                                <div className="demo-hint">
+                                    Compte démo : <strong>{DEMO_USER.email}</strong><br />
+                                    Mot de passe : <strong>{DEMO_USER.password}</strong>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Dashboard Component
+        function Dashboard({ user }) {
+            const scans = storage.getScans();
+            const lastScan = scans[scans.length - 1];
+            
+            const hasScannedToday = lastScan && 
+                new Date(lastScan.date).toDateString() === new Date().toDateString();
+            
+            const avgScore = lastScan ? 
+                Math.round((lastScan.scores.pensee + lastScan.scores.parole + lastScan.scores.action) / 3) : 0;
+            
+            return (
+                <div className="dashboard">
+                    <div className="welcome">
+                        <h2>Bienvenue, {user.name} 👋</h2>
+                        <p>Votre parcours vers la congruence parfaite</p>
+                    </div>
+                    
+                    <div className="cards-grid">
+                        <div className="card">
+                            <h3>🎯 Scan quotidien</h3>
+                            <p>
+                                {hasScannedToday 
+                                    ? "Vous avez déjà fait votre scan aujourd'hui !"
+                                    : "Évaluez votre congruence aujourd'hui"}
+                            </p>
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: hasScannedToday ? 'results' : 'scan' }))}
+                            >
+                                {hasScannedToday ? 'Voir les résultats' : 'Commencer le scan'}
+                            </button>
+                        </div>
+                        
+                        <div className="card">
+                            <h3>📚 Exercices</h3>
+                            <p>Renforcez votre alignement avec des exercices ciblés</p>
+                            <button 
+                                className="btn btn-primary"
+                                onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'exercises' }))}
+                            >
+                                Explorer
+                            </button>
+                        </div>
+                        
+                        <div className="card">
+                            <h3>📖 Journal</h3>
+                            <p>Notez vos réflexions et votre progression</p>
+                            <button 
+                                className="btn btn-primary"
+                                onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'journal' }))}
+                            >
+                                Écrire
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {lastScan && (
+                        <div className="triangle-container">
+                            <h2 className="triangle-title">Votre Triangle de Congruence</h2>
+                            <TriangleCanvas scores={lastScan.scores} />
+                            <div className="congruence-score">
+                                <div className="score-item">
+                                    <div className="score-value" style={{color: 'var(--pensee)'}}>
+                                        {lastScan.scores.pensee}%
+                                    </div>
+                                    <div className="score-label">Pensée</div>
+                                </div>
+                                <div className="score-item">
+                                    <div className="score-value" style={{color: 'var(--parole)'}}>
+                                        {lastScan.scores.parole}%
+                                    </div>
+                                    <div className="score-label">Parole</div>
+                                </div>
+                                <div className="score-item">
+                                    <div className="score-value" style={{color: 'var(--action)'}}>
+                                        {lastScan.scores.action}%
+                                    </div>
+                                    <div className="score-label">Action</div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Scan Component
+        function Scan() {
+            const [currentQuestion, setCurrentQuestion] = useState(0);
+            const [answers, setAnswers] = useState({});
+            const [showResults, setShowResults] = useState(false);
+            const [results, setResults] = useState(null);
+            
+            const progress = ((currentQuestion + 1) / QUESTIONS.length) * 100;
+            const question = QUESTIONS[currentQuestion];
+            
+            const handleAnswer = (rating) => {
+                setAnswers({...answers, [question.id]: rating});
+            };
+            
+            const handleNext = () => {
+                if (currentQuestion < QUESTIONS.length - 1) {
+                    setCurrentQuestion(currentQuestion + 1);
+                } else {
+                    calculateResults();
+                }
+            };
+            
+            const handlePrevious = () => {
+                if (currentQuestion > 0) {
+                    setCurrentQuestion(currentQuestion - 1);
+                }
+            };
+            
+            const calculateResults = () => {
+                const penseeQuestions = QUESTIONS.filter(q => q.pillar === 'pensee');
+                const paroleQuestions = QUESTIONS.filter(q => q.pillar === 'parole');
+                const actionQuestions = QUESTIONS.filter(q => q.pillar === 'action');
+                
+                const penseeScore = Math.round(
+                    (penseeQuestions.reduce((sum, q) => sum + (answers[q.id] || 0), 0) / (penseeQuestions.length * 5)) * 100
+                );
+                const paroleScore = Math.round(
+                    (paroleQuestions.reduce((sum, q) => sum + (answers[q.id] || 0), 0) / (paroleQuestions.length * 5)) * 100
+                );
+                const actionScore = Math.round(
+                    (actionQuestions.reduce((sum, q) => sum + (answers[q.id] || 0), 0) / (actionQuestions.length * 5)) * 100
+                );
+                
+                const scanResults = {
+                    date: new Date().toISOString(),
+                    scores: {
+                        pensee: penseeScore,
+                        parole: paroleScore,
+                        action: actionScore
+                    },
+                    answers: answers
+                };
+                
+                storage.addScan(scanResults);
+                setResults(scanResults);
+                setShowResults(true);
+            };
+            
+            const getPillarClass = (pillar) => {
+                return `pillar-${pillar}`;
+            };
+            
+            const getPillarName = (pillar) => {
+                const names = {
+                    'pensee': 'Pensée',
+                    'parole': 'Parole',
+                    'action': 'Action'
+                };
+                return names[pillar];
+            };
+            
+            if (showResults && results) {
+                const avgScore = Math.round((results.scores.pensee + results.scores.parole + results.scores.action) / 3);
+                
+                return (
+                    <div className="results-container">
+                        <div className="results-hero">
+                            <h2>Scan terminé ! 🎉</h2>
+                            <p>Voici votre niveau de congruence</p>
+                            <div className="main-score">{avgScore}%</div>
+                            <p style={{color: 'var(--text-secondary)'}}>Score global de congruence</p>
+                        </div>
+                        
+                        <div className="pillar-scores">
+                            <div className="pillar-score-card">
+                                <h3 style={{color: 'var(--pensee)'}}>Pensée</h3>
+                                <div className="pillar-score-value" style={{color: 'var(--pensee)'}}>
+                                    {results.scores.pensee}%
+                                </div>
+                            </div>
+                            <div className="pillar-score-card">
+                                <h3 style={{color: 'var(--parole)'}}>Parole</h3>
+                                <div className="pillar-score-value" style={{color: 'var(--parole)'}}>
+                                    {results.scores.parole}%
+                                </div>
+                            </div>
+                            <div className="pillar-score-card">
+                                <h3 style={{color: 'var(--action)'}}>Action</h3>
+                                <div className="pillar-score-value" style={{color: 'var(--action)'}}>
+                                    {results.scores.action}%
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="triangle-container">
+                            <h2 className="triangle-title">Votre Triangle de Congruence</h2>
+                            <TriangleCanvas scores={results.scores} />
+                        </div>
+                        
+                        <button 
+                            className="btn btn-primary"
+                            onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'dashboard' }))}
+                        >
+                            Retour au tableau de bord
+                        </button>
+                    </div>
+                );
+            }
+            
+            return (
+                <div className="scan-container">
+                    <div className="scan-header">
+                        <h2>Scan Quotidien</h2>
+                        <p>Question {currentQuestion + 1} sur {QUESTIONS.length}</p>
+                        <div className="progress-bar">
+                            <div className="progress-fill" style={{width: progress + '%'}}></div>
+                        </div>
+                    </div>
+                    
+                    <div className="question-card">
+                        <div className={`pillar-badge ${getPillarClass(question.pillar)}`}>
+                            {getPillarName(question.pillar)}
+                        </div>
+                        <div className="question-text">{question.text}</div>
+                        
+                        <div className="rating-buttons">
+                            {[1, 2, 3, 4, 5].map(rating => (
+                                <button
+                                    key={rating}
+                                    className={`rating-btn ${answers[question.id] === rating ? 'selected' : ''}`}
+                                    onClick={() => handleAnswer(rating)}
+                                >
+                                    {rating}
+                                </button>
+                            ))}
+                        </div>
+                        
+                        <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '16px', fontSize: '12px', color: 'var(--text-secondary)'}}>
+                            <span>Pas du tout</span>
+                            <span>Totalement</span>
+                        </div>
+                        
+                        <div className="scan-navigation">
+                            {currentQuestion > 0 && (
+                                <button className="btn btn-secondary" onClick={handlePrevious}>
+                                    Précédent
+                                </button>
+                            )}
+                            <button 
+                                className="btn btn-primary" 
+                                onClick={handleNext}
+                                disabled={!answers[question.id]}
+                            >
+                                {currentQuestion === QUESTIONS.length - 1 ? 'Terminer' : 'Suivant'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Exercises Component
+        function Exercises() {
+            const [selectedExercise, setSelectedExercise] = useState(null);
+            
+            // Helper functions
+            const getPillarClass = (pillar) => `pillar-${pillar}`;
+            const getPillarName = (pillar) => {
+                const names = { 'pensee': 'Pensée', 'parole': 'Parole', 'action': 'Action' };
+                return names[pillar];
+            };
+            
+            if (selectedExercise) {
+                return (
+                    <div className="container">
+                        <button 
+                            className="btn btn-secondary" 
+                            onClick={() => setSelectedExercise(null)}
+                            style={{marginBottom: '24px'}}
+                        >
+                            ← Retour aux exercices
+                        </button>
+                        
+                        <div className="card" style={{maxWidth: '800px', margin: '0 auto'}}>
+                            <div className={`pillar-badge ${getPillarClass(selectedExercise.pillar)}`}>
+                                {getPillarName(selectedExercise.pillar)}
+                            </div>
+                            <h2 style={{fontSize: '32px', marginBottom: '16px'}}>{selectedExercise.title}</h2>
+                            <p style={{fontSize: '18px', marginBottom: '24px'}}>{selectedExercise.description}</p>
+                            
+                            <div style={{background: 'var(--bg-secondary)', padding: '24px', borderRadius: '12px', marginBottom: '24px'}}>
+                                <h3 style={{marginBottom: '16px'}}>⏱ Durée : {selectedExercise.duration}</h3>
+                            </div>
+                            
+                            <div>
+                                <h3 style={{marginBottom: '16px'}}>Instructions</h3>
+                                <p style={{lineHeight: '1.8', whiteSpace: 'pre-line'}}>{selectedExercise.instructions}</p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+            
+            return (
+                <div className="container">
+                    <div style={{textAlign: 'center', marginBottom: '40px'}}>
+                        <h2 style={{fontSize: '32px', marginBottom: '12px'}}>Bibliothèque d'Exercices</h2>
+                        <p style={{color: 'var(--text-secondary)'}}>Renforcez votre congruence avec des pratiques ciblées</p>
+                    </div>
+                    
+                    <div className="exercises-grid">
+                        {EXERCISES.map(exercise => (
+                            <div 
+                                key={exercise.id} 
+                                className="exercise-card"
+                                onClick={() => setSelectedExercise(exercise)}
+                            >
+                                <div className="exercise-header">
+                                    <div className={`pillar-badge ${getPillarClass(exercise.pillar)}`}>
+                                        {getPillarName(exercise.pillar)}
+                                    </div>
+                                    <div className="exercise-duration">{exercise.duration}</div>
+                                </div>
+                                <h3 style={{marginBottom: '12px'}}>{exercise.title}</h3>
+                                <p style={{color: 'var(--text-secondary)'}}>{exercise.description}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // Journal Component
+        function Journal() {
+            const [entries, setEntries] = useState(storage.getJournal());
+            const [newEntry, setNewEntry] = useState('');
+            
+            const handleSave = () => {
+                if (!newEntry.trim()) return;
+                
+                const entry = {
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    content: newEntry
+                };
+                
+                storage.addJournalEntry(entry);
+                setEntries([entry, ...entries]);
+                setNewEntry('');
+            };
+            
+            return (
+                <div className="container">
+                    <div style={{textAlign: 'center', marginBottom: '40px'}}>
+                        <h2 style={{fontSize: '32px', marginBottom: '12px'}}>Journal Personnel</h2>
+                        <p style={{color: 'var(--text-secondary)'}}>Notez vos réflexions sur votre parcours</p>
+                    </div>
+                    
+                    <div style={{maxWidth: '800px', margin: '0 auto'}}>
+                        <div className="card" style={{marginBottom: '32px'}}>
+                            <h3 style={{marginBottom: '16px'}}>Nouvelle entrée</h3>
+                            <textarea
+                                value={newEntry}
+                                onChange={(e) => setNewEntry(e.target.value)}
+                                placeholder="Écrivez vos pensées, observations, défis ou victoires..."
+                            />
+                            <button 
+                                className="btn btn-primary" 
+                                onClick={handleSave}
+                                style={{marginTop: '16px'}}
+                            >
+                                Enregistrer
+                            </button>
+                        </div>
+                        
+                        <h3 style={{marginBottom: '24px'}}>Entrées précédentes</h3>
+                        {entries.length === 0 ? (
+                            <div className="card" style={{textAlign: 'center', padding: '40px'}}>
+                                <p style={{color: 'var(--text-secondary)'}}>Aucune entrée pour le moment. Commencez à écrire ! ✍️</p>
+                            </div>
+                        ) : (
+                            entries.map(entry => (
+                                <div key={entry.id} className="journal-entry">
+                                    <div className="entry-header">
+                                        <div className="entry-date">
+                                            {new Date(entry.date).toLocaleDateString('fr-FR', {
+                                                weekday: 'long',
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            })}
+                                        </div>
+                                    </div>
+                                    <p style={{whiteSpace: 'pre-line', lineHeight: '1.8'}}>{entry.content}</p>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Results Component (affiche le dernier scan du jour)
+        function Results() {
+            const scans = storage.getScans();
+            const todayScan = scans.filter(scan =>
+                new Date(scan.date).toDateString() === new Date().toDateString()
+            ).pop();
+
+            if (!todayScan) {
+                return (
+                    <div className="results-container">
+                        <div className="card" style={{textAlign: 'center', padding: '60px'}}>
+                            <p style={{color: 'var(--text-secondary)', marginBottom: '24px'}}>
+                                Aucun scan aujourd'hui. Faites votre scan quotidien !
+                            </p>
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'scan' }))}
+                            >
+                                Commencer le scan
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            const avgScore = Math.round((todayScan.scores.pensee + todayScan.scores.parole + todayScan.scores.action) / 3);
+
+            return (
+                <div className="results-container">
+                    <div className="results-hero">
+                        <h2>Résultats du jour</h2>
+                        <p>Votre niveau de congruence</p>
+                        <div className="main-score">{avgScore}%</div>
+                        <p style={{color: 'var(--text-secondary)'}}>Score global de congruence</p>
+                    </div>
+
+                    <div className="pillar-scores">
+                        <div className="pillar-score-card">
+                            <h3 style={{color: 'var(--pensee)'}}>Pensée</h3>
+                            <div className="pillar-score-value" style={{color: 'var(--pensee)'}}>
+                                {todayScan.scores.pensee}%
+                            </div>
+                        </div>
+                        <div className="pillar-score-card">
+                            <h3 style={{color: 'var(--parole)'}}>Parole</h3>
+                            <div className="pillar-score-value" style={{color: 'var(--parole)'}}>
+                                {todayScan.scores.parole}%
+                            </div>
+                        </div>
+                        <div className="pillar-score-card">
+                            <h3 style={{color: 'var(--action)'}}>Action</h3>
+                            <div className="pillar-score-value" style={{color: 'var(--action)'}}>
+                                {todayScan.scores.action}%
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="triangle-container">
+                        <h2 className="triangle-title">Votre Triangle de Congruence</h2>
+                        <TriangleCanvas scores={todayScan.scores} />
+                    </div>
+
+                    <button
+                        className="btn btn-primary"
+                        onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'dashboard' }))}
+                    >
+                        Retour au tableau de bord
+                    </button>
+                </div>
+            );
+        }
+
+        // Progress Component
+        function Progress() {
+            const scans = storage.getScans();
+            const totalScans = scans.length;
+            const avgScore = scans.length > 0 
+                ? Math.round(scans.reduce((sum, scan) => 
+                    sum + (scan.scores.pensee + scan.scores.parole + scan.scores.action) / 3, 0) / scans.length)
+                : 0;
+            
+            return (
+                <div className="container">
+                    <div style={{textAlign: 'center', marginBottom: '40px'}}>
+                        <h2 style={{fontSize: '32px', marginBottom: '12px'}}>Votre Progression</h2>
+                        <p style={{color: 'var(--text-secondary)'}}>Suivez votre évolution au fil du temps</p>
+                    </div>
+                    
+                    <div className="stats-grid" style={{marginBottom: '40px'}}>
+                        <div className="stat-card">
+                            <div className="stat-value">{totalScans}</div>
+                            <div className="stat-label">Scans réalisés</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-value">{avgScore}%</div>
+                            <div className="stat-label">Score moyen</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-value">{storage.getJournal().length}</div>
+                            <div className="stat-label">Entrées de journal</div>
+                        </div>
+                    </div>
+                    
+                    {scans.length > 0 ? (
+                        <div className="progress-chart">
+                            <h3 style={{marginBottom: '24px'}}>Historique des scans</h3>
+                            {scans.slice(-10).reverse().map((scan, index) => {
+                                const avgScore = Math.round((scan.scores.pensee + scan.scores.parole + scan.scores.action) / 3);
+                                return (
+                                    <div key={index} style={{marginBottom: '24px'}}>
+                                        <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '8px'}}>
+                                            <span style={{color: 'var(--text-secondary)', fontSize: '14px'}}>
+                                                {new Date(scan.date).toLocaleDateString('fr-FR')}
+                                            </span>
+                                            <span style={{fontWeight: '600', fontFamily: 'Space Mono'}}>{avgScore}%</span>
+                                        </div>
+                                        <div style={{height: '8px', background: 'var(--bg-secondary)', borderRadius: '8px', overflow: 'hidden'}}>
+                                            <div style={{
+                                                height: '100%',
+                                                width: avgScore + '%',
+                                                background: 'linear-gradient(90deg, var(--pensee), var(--parole), var(--action))',
+                                                borderRadius: '8px',
+                                                transition: 'width 0.5s ease'
+                                            }}></div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="card" style={{textAlign: 'center', padding: '60px'}}>
+                            <p style={{color: 'var(--text-secondary)', marginBottom: '24px'}}>
+                                Commencez votre premier scan pour voir votre progression ! 📊
+                            </p>
+                            <button 
+                                className="btn btn-primary"
+                                onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'scan' }))}
+                            >
+                                Faire un scan
+                            </button>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Main App Component
+        function App() {
+            const [user, setUser] = useState(storage.getUser());
+            const [currentView, setCurrentView] = useState('dashboard');
+            
+            useEffect(() => {
+                const handleNavigate = (e) => {
+                    setCurrentView(e.detail);
+                };
+                
+                window.addEventListener('navigate', handleNavigate);
+                return () => window.removeEventListener('navigate', handleNavigate);
+            }, []);
+            
+            const handleLogout = () => {
+                storage.removeUser();
+                setUser(null);
+                setCurrentView('dashboard');
+            };
+
+            const handleLogin = (loggedUser) => {
+                setUser(loggedUser);
+                setCurrentView('dashboard');
+            };
+            
+            if (!user) {
+                return <Auth onLogin={handleLogin} />;
+            }
+            
+            return (
+                <>
+                    <nav>
+                        <div className="nav-content">
+                            <div className="nav-logo">KONGRUANS</div>
+                            <div className="nav-menu">
+                                <button 
+                                    className={`nav-btn ${currentView === 'dashboard' ? 'active' : ''}`}
+                                    onClick={() => setCurrentView('dashboard')}
+                                >
+                                    Tableau de bord
+                                </button>
+                                <button 
+                                    className={`nav-btn ${currentView === 'scan' ? 'active' : ''}`}
+                                    onClick={() => setCurrentView('scan')}
+                                >
+                                    Scan
+                                </button>
+                                <button 
+                                    className={`nav-btn ${currentView === 'exercises' ? 'active' : ''}`}
+                                    onClick={() => setCurrentView('exercises')}
+                                >
+                                    Exercices
+                                </button>
+                                <button 
+                                    className={`nav-btn ${currentView === 'journal' ? 'active' : ''}`}
+                                    onClick={() => setCurrentView('journal')}
+                                >
+                                    Journal
+                                </button>
+                                <button 
+                                    className={`nav-btn ${currentView === 'progress' ? 'active' : ''}`}
+                                    onClick={() => setCurrentView('progress')}
+                                >
+                                    Progression
+                                </button>
+                                <button className="nav-btn" onClick={handleLogout}>
+                                    Déconnexion
+                                </button>
+                            </div>
+                        </div>
+                    </nav>
+                    
+                    <div className="container">
+                        {currentView === 'dashboard' && <Dashboard user={user} />}
+                        {currentView === 'scan' && <Scan />}
+                        {currentView === 'results' && <Results />}
+                        {currentView === 'exercises' && <Exercises />}
+                        {currentView === 'journal' && <Journal />}
+                        {currentView === 'progress' && <Progress />}
+                    </div>
+                </>
+            );
+        }
+
+        // Render
+        const root = ReactDOM.createRoot(document.getElementById('app'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+# Fichiers système
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Notes internes
+problemes.txt.txt
+
+# Fichiers temporaires Claude
+tmpclaude-*
+nul
