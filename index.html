@@ -838,9 +838,12 @@
 
         const normalizeEmail = (email) => (email || '').trim().toLowerCase();
 
-        // Nettoyage des anciennes données (migration v1 → v2)
+        // Nettoyage des anciennes données (migration v1 → v2) - s'exécute UNE SEULE FOIS
         (function cleanupLegacyData() {
             try {
+                // Vérifier si la migration a déjà été faite
+                if (localStorage.getItem('kongruans_migrated_v2')) return;
+
                 // Supprimer les anciennes données globales
                 localStorage.removeItem('kongruans_scans');
                 localStorage.removeItem('kongruans_journal');
@@ -852,6 +855,9 @@
                     localStorage.removeItem('kongruans_user');
                     console.log('KONGRUANS: Anciennes données nettoyées. Veuillez recréer votre compte.');
                 }
+
+                // Marquer la migration comme effectuée
+                localStorage.setItem('kongruans_migrated_v2', 'true');
             } catch (e) { /* ignore */ }
         })();
 
